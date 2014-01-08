@@ -1,10 +1,17 @@
-<?php namespace api
+<?php namespace api;
 
+use Auth;
 use Controller;
+use Hash;
+use Input;
+use Response;
+use Validator;
+
+use User;
 
 class AuthController extends Controller {
   public function __construct() {
-    $this->beforeFilter('csrf', ['on' => ['post', 'put', 'delete']]);
+    //$this->beforeFilter('csrf', ['on' => ['post', 'put', 'delete']]);
   }
   
   public function register() {
