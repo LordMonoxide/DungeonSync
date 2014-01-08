@@ -26,6 +26,10 @@ public class DungeonSync {
     _frame.setVisible(true);
   }
   
+  public void register(String email, String password) {
+    request("api/register/", "PUT", param("email", email), param("password", password), param("password_confirmation", password));
+  }
+  
   public void request(String url, String method, Parameter... param) {
     request(url, method, "UTF-8", param);
   }
