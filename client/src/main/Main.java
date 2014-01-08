@@ -7,6 +7,6 @@ public class Main {
     System.out.println("Starting...");
     
     DungeonSync ds = new DungeonSync();
-    ds.register("corey@narwhunderful.com", "monoxide");
+    ds.login("corey@narwhunderful.com", "monoxide");
   }
 }

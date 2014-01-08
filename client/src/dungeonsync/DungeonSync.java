@@ -12,6 +12,7 @@ import java.net.URLEncoder;
 
 import javax.swing.JFrame;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -28,6 +29,10 @@ public class DungeonSync {
   
   public void register(String email, String password) {
     request("api/register/", "PUT", param("email", email), param("password", password), param("password_confirmation", password));
+  }
+  
+  public void login(String email, String password) {
+    request("api/login/", "PUT", param("email", email), param("password", password));
   }
   
   public void request(String url, String method, Parameter... param) {
@@ -87,7 +92,10 @@ public class DungeonSync {
     
     try {
       while((line = rd.readLine()) != null) {
-        line = line.substring(1, line.length() - 1);
+        if(line.length() > 1) {
+          line = line.substring(1, line.length() - 1);
+        }
+        
         line = line.replaceAll("\\\\\"", "\"");
         resp.append(line);
         resp.append('\r');
@@ -100,7 +108,12 @@ public class DungeonSync {
       rd.close();
     } catch(IOException e1) { }
     
-    return new JSONObject(new JSONTokener(resp.toString()));
+    try {
+      return new JSONObject(new JSONTokener(resp.toString()));
+    } catch(JSONException e) {
+      System.out.println(resp.toString());
+      return null;
+    }
   }
   
   public static class Parameter {
