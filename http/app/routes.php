@@ -11,3 +11,5 @@ Route::get('/register', ['as' => 'home.register', 'uses' => 'HomeController@regi
 Route::put('/register', ['as' => 'auth.register', 'uses' => 'AuthController@register']);
 Route::get('/login',    ['as' => 'home.login',    'uses' => 'HomeController@login']);
 Route::put('/login',    ['as' => 'auth.login',    'uses' => 'AuthController@login']);
+
+Route::resource('characters', 'CharacterController');

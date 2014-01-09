@@ -8,6 +8,10 @@
 </head>
 
 <body>
+  <header>
+    @yield('header')
+  </header>
+  
 	<section>
     @yield('content')
   </section>
