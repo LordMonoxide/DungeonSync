@@ -17,7 +17,8 @@ class AuthController extends Controller {
   public function register() {
     $validator = Validator::make(Input::all(), [
       'email'    => ['required', 'email', 'unique:users,email'],
-      'password' => ['required', 'min:8', 'max:256', 'confirmed']
+      'password' => ['required', 'min:8', 'max:256', 'confirmed'],
+      'remember' => ['in:yes,no,on,off,1,0']
     ]);
     
     if($validator->passes()) {
@@ -26,7 +27,11 @@ class AuthController extends Controller {
       $user->password = Hash::make(Input::get('password'));
       $user->save();
       
-      Auth::login($user);
+      $remember = Input::get('remember', false);
+      if($remember === 'yes' || $remember === 'on')  { $remember = true; }
+      if($remember === 'no'  || $remember === 'off') { $remember = false; }
+      
+      Auth::login($user, $remember);
       
       return Response::json('{}', 201);
     } else {
@@ -37,11 +42,16 @@ class AuthController extends Controller {
   public function login() {
     $validator = Validator::make(Input::all(), [
       'email'    => ['required', 'email', 'exists:users,email'],
-      'password' => ['required', 'min:8', 'max:256']
+      'password' => ['required', 'min:8', 'max:256'],
+      'remember' => ['in:yes,no,on,off,1,0']
     ]);
     
     if($validator->passes()) {
-      if(!Auth::attempt(['email' => Input::get('email'), 'password' => Input::get('password')])) {
+      $remember = Input::get('remember', false);
+      if($remember === 'yes' || $remember === 'on')  { $remember = true; }
+      if($remember === 'no'  || $remember === 'off') { $remember = false; }
+      
+      if(!Auth::attempt(['email' => Input::get('email'), 'password' => Input::get('password')], $remember)) {
         return Response::json('{"password": ["Invalid password"]}', 409);
       }
       
