@@ -1,7 +1,7 @@
 @extends('characters.layout')
 
 @section('content')
-  {{ Form::open(['action' => 'characters.store', 'files' => true, 'class' => 'pure-form pure-form-stacked']) }}
+  {{ Form::open(['action' => 'characters.store', 'files' => true, 'class' => 'pure-form']) }}
   
   <table class="pure-table">
     <thead>
