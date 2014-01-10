@@ -79,14 +79,6 @@ public class API {
       
       if(con != null) {
         return JSONFromInputStream(con.getErrorStream());
-        /*for(Object err : json.keySet()) {
-          String error = (String)err;
-          System.out.println(error + ":");
-          
-          for(int i = 0; i < json.getJSONArray(error).length(); i++) {
-            System.out.println(json.getJSONArray(error).get(i));
-          }
-        }*/
       }
     }
     
