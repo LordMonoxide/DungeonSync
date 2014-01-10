@@ -1,6 +1,11 @@
 <?php
 
 Route::group(['prefix' => 'api'], function() {
+  Route::group(['prefix' => 'lang'], function() {
+    Route::get('/app',        ['as' => 'api.lang.app',        'uses' => 'api\LangController@app']);
+    Route::get('/characters', ['as' => 'api.lang.characters', 'uses' => 'api\LangController@characters']);
+  });
+  
   Route::group(['prefix' => 'auth'], function() {
     Route::put('/register', ['as' => 'api.auth.register', 'uses' => 'api\AuthController@register']);
     Route::put('/login',    ['as' => 'api.auth.login',    'uses' => 'api\AuthController@login']);
