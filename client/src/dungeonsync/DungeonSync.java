@@ -17,9 +17,10 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 public class DungeonSync {
-  private static final String baseURL = "http://dungeonsync.monoxidedesign.com/";
+  private static final String baseURL = "http://dungeonsync.monoxidedesign.com/api/auth/";
 
   JFrame _frame;
+  
   
   public DungeonSync() {
     _frame = new JFrame("Dungeon Sync");
@@ -28,11 +29,11 @@ public class DungeonSync {
   }
   
   public void register(String email, String password) {
-    request("api/register/", "PUT", param("email", email), param("password", password), param("password_confirmation", password));
+    request("register", "PUT", param("email", email), param("password", password), param("password_confirmation", password));
   }
   
   public void login(String email, String password) {
-    request("api/login/", "PUT", param("email", email), param("password", password));
+    request("login", "PUT", param("email", email), param("password", password));
   }
   
   public void request(String url, String method, Parameter... param) {
