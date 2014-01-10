@@ -35,7 +35,7 @@ class AuthController extends Controller {
       
       return Response::json('{}', 201);
     } else {
-      return Response::json($validator->messages()->toJson(), 409);
+      return Response::json($validator->messages(), 409);
     }
   }
   
@@ -57,7 +57,7 @@ class AuthController extends Controller {
       
       return Response::json('{}', 200);
     } else {
-      return Response::json($validator->messages()->toJson(), 409);
+      return Response::json($validator->messages(), 409);
     }
   }
   
