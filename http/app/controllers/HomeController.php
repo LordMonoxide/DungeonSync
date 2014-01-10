@@ -1,6 +1,10 @@
 <?php
 
 class HomeController extends BaseController {
+  public function __construct() {
+    $this->beforeFilter('guest');
+  }
+  
   public function home() {
     return Redirect::route('home.login');
   }
