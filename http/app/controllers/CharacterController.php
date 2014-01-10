@@ -41,7 +41,7 @@ class CharacterController extends BaseController {
       $character->original = $name;
       $character->save();
       
-      $file->move(storage_path() . '\uploads', $character->filename);
+      $file->move(storage_path() . '/uploads', $character->filename);
     } else {
       echo $validator->messages();
     }
