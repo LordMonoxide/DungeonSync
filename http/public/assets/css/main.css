@@ -11,3 +11,7 @@ label.required {
 label.required:before {
   content: '* ';
 }
+
+a {
+  text-decoration: none;
+}
