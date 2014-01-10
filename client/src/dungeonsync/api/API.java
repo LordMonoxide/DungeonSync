@@ -71,8 +71,6 @@ public class API {
         out.close();
       }
       
-      System.out.println(con.getContentType());
-      
       return JSONFromInputStream(con.getInputStream());
     } catch(MalformedURLException e) {
       e.printStackTrace();
