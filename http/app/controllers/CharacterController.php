@@ -6,7 +6,7 @@ class CharacterController extends BaseController {
   }
   
   public function index() {
-    $characters = Auth::user()->characters();
+    $characters = Auth::user()->characters;
     return View::make('characters.index')->with('characters', $characters);
   }
   
