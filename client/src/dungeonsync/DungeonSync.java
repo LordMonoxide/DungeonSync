@@ -1,127 +1,157 @@
 package dungeonsync;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JPasswordField;
+
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jgoodies.forms.factories.FormFactory;
+
+import dungeonsync.api.API;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+
+import java.awt.Font;
+
+import javax.swing.event.ChangeEvent;
+
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.HashMap;
 
 public class DungeonSync {
-  private static final String baseURL = "http://dungeonsync.monoxidedesign.com/api/auth/";
-
-  JFrame _frame;
+  private JFrame frame;
+  private JPanel panel;
+  private JTextField txtEmail;
+  private JPasswordField txtPassword;
+  private JPasswordField txtConfirm;
+  private JButton btnLogIn;
+  private JCheckBox chkNewAccount;
   
+  private HashMap<String, String> langApp;
   
   public DungeonSync() {
-    _frame = new JFrame("Dungeon Sync");
-    _frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    _frame.setVisible(true);
+    EventQueue.invokeLater(() -> {
+      initialize();
+      frame.setVisible(true);
+    });
   }
   
-  public void register(String email, String password) {
-    request("register", "PUT", param("email", email), param("password", password), param("password_confirmation", password));
-  }
-  
-  public void login(String email, String password) {
-    request("login", "PUT", param("email", email), param("password", password));
-  }
-  
-  public void request(String url, String method, Parameter... param) {
-    request(url, method, "UTF-8", param);
-  }
-  
-  public void request(String url, String method, String encoding, Parameter... param) {
-    HttpURLConnection con = null;
-    try {
-      con = (HttpURLConnection)new URL(baseURL + url).openConnection();
-      con.setRequestMethod("PUT");
-      con.setRequestProperty("Accept-Charset", encoding);
-      con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + encoding);
-      con.setUseCaches(false);
-      con.setDoInput(true);
-      con.setDoOutput(true);
-      
-      String params = "";
-      for(Parameter p : param) {
-        if(params.length() != 0) { params += "&"; }
-        params += p.key + "=" + URLEncoder.encode(p.val, encoding);
-      }
-      
-      OutputStream out = con.getOutputStream();
-      out.write(params.getBytes("UTF-8"));
-      out.close();
-      
-      JSONObject json = JSONFromInputStream(con.getInputStream());
-      System.out.println(json);
-    } catch(MalformedURLException e) {
-      e.printStackTrace();
-    } catch(IOException e) {
-      e.printStackTrace();
-      
-      if(con != null) {
-        JSONObject json = JSONFromInputStream(con.getErrorStream());
-        for(Object err : json.keySet()) {
-          String error = (String)err;
-          System.out.println(error + ":");
-          
-          for(int i = 0; i < json.getJSONArray(error).length(); i++) {
-            System.out.println(json.getJSONArray(error).get(i));
+  /**
+   * @wbp.parser.entryPoint
+   */
+  private void initialize() {
+    langApp = API.lang("app");
+    
+    frame = new JFrame();
+    frame.setBounds(100, 100, 427, 232);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.getContentPane().setLayout(new BorderLayout(0, 0));
+    
+    panel = new JPanel();
+    frame.getContentPane().add(panel, BorderLayout.CENTER);
+    panel.setLayout(new FormLayout(new ColumnSpec[] {
+        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+        FormFactory.MIN_COLSPEC,
+        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+        FormFactory.GLUE_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,
+        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,},
+      new RowSpec[] {
+        FormFactory.LINE_GAP_ROWSPEC,
+        FormFactory.MIN_ROWSPEC,
+        FormFactory.LINE_GAP_ROWSPEC,
+        FormFactory.MIN_ROWSPEC,
+        FormFactory.MIN_ROWSPEC,
+        FormFactory.MIN_ROWSPEC,
+        FormFactory.LINE_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.LINE_GAP_ROWSPEC,}));
+    
+    JLabel lblTitle = new JLabel(langApp.get("title"));
+    lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 16));
+    panel.add(lblTitle, "2, 2, 5, 1");
+    
+    JLabel lblEmail = new JLabel(langApp.get("email") + ":");
+    panel.add(lblEmail, "2, 4, left, top");
+    
+    txtEmail = new JTextField();
+    panel.add(txtEmail, "4, 4, 3, 1, fill, top");
+    txtEmail.setColumns(10);
+    
+    JLabel lblPassword = new JLabel(langApp.get("password") + ":");
+    panel.add(lblPassword, "2, 5, left, top");
+    
+    txtPassword = new JPasswordField();
+    panel.add(txtPassword, "4, 5, 3, 1, fill, fill");
+    
+    JLabel lblConfirm = new JLabel(langApp.get("password_confirmation") + ":");
+    lblConfirm.setVisible(false);
+    panel.add(lblConfirm, "2, 6, left, top");
+    
+    txtConfirm = new JPasswordField();
+    txtConfirm.setVisible(false);
+    panel.add(txtConfirm, "4, 6, 3, 1, fill, fill");
+    
+    chkNewAccount = new JCheckBox(langApp.get("newaccount"));
+    chkNewAccount.addChangeListener((ChangeEvent ev) -> {
+      lblConfirm.setVisible(chkNewAccount.isSelected());
+      txtConfirm.setVisible(chkNewAccount.isSelected());
+    });
+    
+    panel.add(chkNewAccount, "5, 8");
+    
+    btnLogIn = new JButton(langApp.get("login"));
+    btnLogIn.addMouseListener(new MouseListener() {
+      @Override public void mouseReleased(MouseEvent ev) { }
+      @Override public void mousePressed(MouseEvent ev) { }
+      @Override public void mouseExited(MouseEvent ev) { }
+      @Override public void mouseEntered(MouseEvent ev) { }
+      @Override public void mouseClicked(MouseEvent ev) {
+        if(ev.getButton() == MouseEvent.BUTTON1) {
+          if(chkNewAccount.isSelected()) {
+            register();
+          } else {
+            login();
           }
         }
       }
-    }
+    });
+    
+    panel.add(btnLogIn, "6, 8");
   }
   
-  public Parameter param(String key, String val) {
-    return new Parameter(key, val);
+  @SuppressWarnings("deprecation")
+  private void register() {
+    setEnabled(false);
+    
+    // We have no choice but to use getText() because URLEncoder sucks
+    API.register(txtEmail.getText(), txtPassword.getText(), txtConfirm.getText());
   }
   
-  private JSONObject JSONFromInputStream(InputStream is) {
-    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-    String line;
-    StringBuffer resp = new StringBuffer();
+  @SuppressWarnings("deprecation")
+  private void login() {
+    setEnabled(false);
     
-    try {
-      while((line = rd.readLine()) != null) {
-        if(line.length() > 1) {
-          line = line.substring(1, line.length() - 1);
-        }
-        
-        line = line.replaceAll("\\\\\"", "\"");
-        resp.append(line);
-        resp.append('\r');
-      }
-    } catch(IOException e1) {
-      e1.printStackTrace();
-    }
-    
-    try {
-      rd.close();
-    } catch(IOException e1) { }
-    
-    try {
-      return new JSONObject(new JSONTokener(resp.toString()));
-    } catch(JSONException e) {
-      System.out.println(resp.toString());
-      return null;
-    }
+    // See register()
+    API.login(txtEmail.getText(), txtPassword.getText());
   }
   
-  public static class Parameter {
-    public final String key, val;
-    public Parameter(String key, String val) {
-      this.key = key;
-      this.val = val;
-    }
+  private void setEnabled(boolean enabled) {
+    txtEmail.setEnabled(enabled);
+    txtPassword.setEnabled(enabled);
+    txtConfirm.setEnabled(enabled);
+    chkNewAccount.setEnabled(enabled);
+    btnLogIn.setEnabled(enabled);
   }
 }
