@@ -8,6 +8,8 @@ class AuthController extends BaseController {
     if($response->getStatusCode() !== 201) {
       return $response->getContent();
     }
+    
+    return Redirect::route('home.home');
   }
   
   public function login() {
@@ -17,6 +19,8 @@ class AuthController extends BaseController {
     if($response->getStatusCode() !== 200) {
       return $response->getContent();
     }
+    
+    return Redirect::intended(URL::route('characters.index'));
   }
   
   public function logout() {
@@ -26,5 +30,7 @@ class AuthController extends BaseController {
     if($response->getStatusCode() !== 200) {
       return $response->getContent();
     }
+    
+    return Redirect::route('home.home');
   }
 }
