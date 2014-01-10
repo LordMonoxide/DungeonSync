@@ -6,7 +6,14 @@ class CharacterController extends BaseController {
   }
   
   public function index() {
-    $characters = Auth::user()->characters;
+    $request  = Request::create(URL::route('api.characters.all'), 'GET');
+    $response = Route::dispatch($request);
+    
+    if($response->getStatusCode() !== 200) {
+      return $response->getContent();
+    }
+    
+    $characters = $response->getData();
     return View::make('characters.index')->with('characters', $characters);
   }
   
