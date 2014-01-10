@@ -33,15 +33,16 @@ App::after(function($request, $response)
 |
 */
 
-Route::filter('auth', function()
-{
-	if (Auth::guest()) return Redirect::guest('login');
+Route::filter('auth', function() {
+  if(Auth::guest()) return Redirect::guest('login');
 });
 
+Route::filter('auth.401', function() {
+  if(Auth::guest()) return Response::make(null, 401);
+});
 
-Route::filter('auth.basic', function()
-{
-	return Auth::basic();
+Route::filter('auth.basic', function() {
+  return Auth::basic();
 });
 
 /*
@@ -55,9 +56,8 @@ Route::filter('auth.basic', function()
 |
 */
 
-Route::filter('guest', function()
-{
-	if (Auth::check()) return Redirect::route('characters.index');
+Route::filter('guest', function() {
+  if(Auth::check()) return Redirect::route('characters.index');
 });
 
 /*
