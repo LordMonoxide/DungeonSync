@@ -10,7 +10,7 @@ class CharacterController extends Controller {
   }
   
   public function all() {
-    return Response::json(Auth::user()->characters->toJson(), 200);
+    return Response::json(Auth::user()->characters, 200);
   }
   
   public function download($character) {
