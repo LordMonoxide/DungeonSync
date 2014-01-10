@@ -7,5 +7,6 @@ return [
   'password_confirmation' => 'Confirm Password',
   'rememberme' => 'Remember Me',
   'register' => 'Register',
-  'login' => 'Log in'
+  'login' => 'Log in',
+  'orregister' => 'or ' . HTML::linkRoute('home.register', 'register')
 ];

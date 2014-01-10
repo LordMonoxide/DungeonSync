@@ -10,5 +10,6 @@
       <input id="remember" type="checkbox">@lang('app.rememberme')
   </label>
   {{ Form::submit(Lang::get('app.login')) }}
+  <span>@lang('app.orregister')</span>
   {{ Form::close() }}
 @stop
