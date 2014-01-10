@@ -14,8 +14,8 @@
       @foreach($characters as $character)
         <tr>
           <td>{{{ $character->original }}}</td>
-          <td>{{ $character->createdAt }}</td>
-          <td>{{ $character->updatedAt }}</td>
+          <td>{{ $character->created_at }}</td>
+          <td>{{ $character->updated_at }}</td>
         </tr>
       @endforeach
     </tbody>
