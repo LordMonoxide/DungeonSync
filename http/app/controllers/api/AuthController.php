@@ -33,7 +33,7 @@ class AuthController extends Controller {
       
       Auth::login($user, $remember);
       
-      return Response::json('{}', 201);
+      return Response::json(null, 201);
     } else {
       return Response::json($validator->messages(), 409);
     }
@@ -55,7 +55,7 @@ class AuthController extends Controller {
         return Response::json('{"password": ["Invalid password"]}', 409);
       }
       
-      return Response::json('{}', 200);
+      return Response::json(null, 200);
     } else {
       return Response::json($validator->messages(), 409);
     }
@@ -63,6 +63,6 @@ class AuthController extends Controller {
   
   public function logout() {
     Auth::logout();
-    return Response::json('{}', 200);
+    return Response::json(null, 200);
   }
 }
