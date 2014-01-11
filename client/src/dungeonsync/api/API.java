@@ -107,10 +107,12 @@ public class API {
       rd.close();
     } catch(IOException e) { }
     
+    System.out.println(resp.toString());
+    
     try {
       return new JSONObject(new JSONTokener(resp.toString()));
     } catch(JSONException e) {
-      System.out.println(resp.toString());
+      e.printStackTrace();
       return null;
     }
   }
