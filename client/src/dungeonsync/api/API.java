@@ -19,7 +19,7 @@ public class API {
   private static final String baseURL = "http://dungeonsync.monoxidedesign.com/api/";
 
   public static HashMap<String, String> lang(String type) {
-    JSONObject json = request("lang/" + type);
+    JSONObject json = request("lang/" + type)._json;
     HashMap<String, String> lang = new HashMap<>();
     
     for(Object k : json.keySet()) {
@@ -30,35 +30,35 @@ public class API {
     return lang;
   }
   
-  public static JSONObject register(String email, String password, String confirmation) {
+  public static Response register(String email, String password, String confirmation) {
     return request("auth/register", "PUT", param("email", email), param("password", password), param("password_confirmation", confirmation));
   }
   
-  public static JSONObject login(String email, String password) {
+  public static Response login(String email, String password) {
     return request("auth/login", "PUT", param("email", email), param("password", password));
   }
   
-  public static JSONObject request(String url, Parameter... param) {
+  public static Response request(String url, Parameter... param) {
     return request(url, "GET", param);
   }
   
-  public static JSONObject request(String url, String method, Parameter... param) {
+  public static Response request(String url, String method, Parameter... param) {
     return request(url, method, "UTF-8", param);
   }
   
-  public static JSONObject request(String url, String method, String encoding, Parameter... param) {
-    HttpURLConnection con = null;
+  public static Response request(String url, String method, String encoding, Parameter... param) {
+    Response con = new Response();
     
     try {
-      con = (HttpURLConnection)new URL(baseURL + url).openConnection();
-      con.setRequestMethod(method);
-      con.setRequestProperty("Accept-Charset", encoding);
-      con.setUseCaches(false);
+      con._con = (HttpURLConnection)new URL(baseURL + url).openConnection();
+      con._con.setRequestMethod(method);
+      con._con.setRequestProperty("Accept-Charset", encoding);
+      con._con.setUseCaches(false);
       
       if(!"GET".equalsIgnoreCase(method)) {
-        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + encoding);
-        con.setDoInput(true);
-        con.setDoOutput(true);
+        con._con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + encoding);
+        con._con.setDoInput(true);
+        con._con.setDoOutput(true);
         
         String params = "";
         for(Parameter p : param) {
@@ -66,19 +66,21 @@ public class API {
           params += p.key + "=" + URLEncoder.encode(p.val, encoding);
         }
         
-        OutputStream out = con.getOutputStream();
+        OutputStream out = con._con.getOutputStream();
         out.write(params.getBytes("UTF-8"));
         out.close();
       }
       
-      return JSONFromInputStream(con.getInputStream());
+      con._json = JSONFromInputStream(con._con.getInputStream());
+      return con;
     } catch(MalformedURLException e) {
       e.printStackTrace();
     } catch(IOException e) {
       e.printStackTrace();
       
       if(con != null) {
-        return JSONFromInputStream(con.getErrorStream());
+        con._json = JSONFromInputStream(con._con.getErrorStream());
+        return con;
       }
     }
     
@@ -123,5 +125,12 @@ public class API {
       this.key = key;
       this.val = val;
     }
+  }
+  
+  public static class Response {
+    private HttpURLConnection _con;
+    private JSONObject _json;
+    public HttpURLConnection con() { return _con; }
+    public JSONObject json() { return _json; }
   }
 }
