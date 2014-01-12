@@ -23,6 +23,10 @@ public class API {
   
   private final String baseURL = "http://dungeonsync.monoxidedesign.com/api/";
   
+  private API() {
+    CookieHandler.setDefault(new CookieManager());
+  }
+  
   public HashMap<String, String> lang(String type) {
     JSONObject json = request("lang/" + type)._json;
     HashMap<String, String> lang = new HashMap<>();
