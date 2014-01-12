@@ -23,6 +23,7 @@ import javax.swing.JCheckBox;
 import java.awt.Font;
 
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -40,9 +41,11 @@ public class DungeonSync {
   private HashMap<String, String> langApp;
   
   public DungeonSync() {
-    EventQueue.invokeLater(() -> {
-      initialize();
-      frame.setVisible(true);
+    EventQueue.invokeLater(new Runnable() {
+      @Override public void run() {
+        initialize();
+        frame.setVisible(true);
+      }
     });
   }
   
@@ -95,7 +98,7 @@ public class DungeonSync {
     txtPassword = new JPasswordField();
     panel.add(txtPassword, "4, 5, 3, 1, fill, fill");
     
-    JLabel lblConfirm = new JLabel(langApp.get("password_confirmation") + ":");
+    final JLabel lblConfirm = new JLabel(langApp.get("password_confirmation") + ":");
     lblConfirm.setVisible(false);
     panel.add(lblConfirm, "2, 6, left, top");
     
@@ -104,9 +107,11 @@ public class DungeonSync {
     panel.add(txtConfirm, "4, 6, 3, 1, fill, fill");
     
     chkNewAccount = new JCheckBox(langApp.get("newaccount"));
-    chkNewAccount.addChangeListener((ChangeEvent ev) -> {
-      lblConfirm.setVisible(chkNewAccount.isSelected());
-      txtConfirm.setVisible(chkNewAccount.isSelected());
+    chkNewAccount.addChangeListener(new ChangeListener() {
+      @Override public void stateChanged(ChangeEvent arg0) {
+        lblConfirm.setVisible(chkNewAccount.isSelected());
+        txtConfirm.setVisible(chkNewAccount.isSelected());
+      }
     });
     
     panel.add(chkNewAccount, "5, 8");
