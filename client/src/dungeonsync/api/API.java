@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,9 +18,12 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 public class API {
-  private static final String baseURL = "http://dungeonsync.monoxidedesign.com/api/";
-
-  public static HashMap<String, String> lang(String type) {
+  private static API _instance = new API();
+  public static API instance() { return _instance; }
+  
+  private final String baseURL = "http://dungeonsync.monoxidedesign.com/api/";
+  
+  public HashMap<String, String> lang(String type) {
     JSONObject json = request("lang/" + type)._json;
     HashMap<String, String> lang = new HashMap<>();
     
@@ -30,23 +35,27 @@ public class API {
     return lang;
   }
   
-  public static Response register(String email, String password, String confirmation) {
+  public Response register(String email, String password, String confirmation) {
     return request("auth/register", "PUT", param("email", email), param("password", password), param("password_confirmation", confirmation));
   }
   
-  public static Response login(String email, String password) {
+  public Response login(String email, String password) {
     return request("auth/login", "PUT", param("email", email), param("password", password));
   }
   
-  public static Response request(String url, Parameter... param) {
+  public Response chars() {
+    return request("characters");
+  }
+  
+  public Response request(String url, Parameter... param) {
     return request(url, "GET", param);
   }
   
-  public static Response request(String url, String method, Parameter... param) {
+  public Response request(String url, String method, Parameter... param) {
     return request(url, method, "UTF-8", param);
   }
   
-  public static Response request(String url, String method, String encoding, Parameter... param) {
+  public Response request(String url, String method, String encoding, Parameter... param) {
     Response con = new Response();
     
     try {
@@ -87,11 +96,11 @@ public class API {
     return null;
   }
   
-  public static Parameter param(String key, String val) {
+  public Parameter param(String key, String val) {
     return new Parameter(key, val);
   }
   
-  private static JSONObject JSONFromInputStream(InputStream is) {
+  private JSONObject JSONFromInputStream(InputStream is) {
     BufferedReader rd = new BufferedReader(new InputStreamReader(is));
     String line;
     StringBuffer resp = new StringBuffer();

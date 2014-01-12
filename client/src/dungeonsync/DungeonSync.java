@@ -31,6 +31,8 @@ import java.util.HashMap;
 import javax.swing.JList;
 
 public class DungeonSync {
+  private API api = API.instance();
+  
   private JFrame frame;
   private JPanel pnlLogin;
   private JTextField txtEmail;
@@ -56,7 +58,7 @@ public class DungeonSync {
    * @wbp.parser.entryPoint
    */
   private void initialize() {
-    langApp = API.lang("app");
+    langApp = api.lang("app");
     
     frame = new JFrame();
     frame.setBounds(100, 100, 427, 232);
@@ -172,7 +174,7 @@ public class DungeonSync {
     setEnabled(false);
     
     // We have no choice but to use getText() because URLEncoder sucks
-    API.register(txtEmail.getText(), txtPassword.getText(), txtConfirm.getText());
+    api.register(txtEmail.getText(), txtPassword.getText(), txtConfirm.getText());
   }
   
   @SuppressWarnings("deprecation")
@@ -180,9 +182,10 @@ public class DungeonSync {
     setEnabled(false);
     
     // See register()
-    API.Response response = API.login(txtEmail.getText(), txtPassword.getText());
+    API.Response response = api.login(txtEmail.getText(), txtPassword.getText());
     if(response.success()) {
-      
+      response = api.chars();
+      System.out.println(response.json());
     }
   }
   
