@@ -28,10 +28,11 @@ import javax.swing.event.ChangeListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
+import javax.swing.JList;
 
 public class DungeonSync {
   private JFrame frame;
-  private JPanel panel;
+  private JPanel pnlLogin;
   private JTextField txtEmail;
   private JPasswordField txtPassword;
   private JPasswordField txtConfirm;
@@ -39,6 +40,8 @@ public class DungeonSync {
   private JCheckBox chkNewAccount;
   
   private HashMap<String, String> langApp;
+  private JPanel pnlChars;
+  private JList list;
   
   public DungeonSync() {
     EventQueue.invokeLater(new Runnable() {
@@ -60,9 +63,37 @@ public class DungeonSync {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.getContentPane().setLayout(new BorderLayout(0, 0));
     
-    panel = new JPanel();
-    frame.getContentPane().add(panel, BorderLayout.CENTER);
-    panel.setLayout(new FormLayout(new ColumnSpec[] {
+    pnlChars = new JPanel();
+    frame.getContentPane().add(pnlChars, BorderLayout.NORTH);
+    pnlChars.setLayout(new FormLayout(new ColumnSpec[] {
+        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+        FormFactory.MIN_COLSPEC,
+        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+        FormFactory.GLUE_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,
+        FormFactory.DEFAULT_COLSPEC,
+        FormFactory.LABEL_COMPONENT_GAP_COLSPEC,},
+      new RowSpec[] {
+        FormFactory.LINE_GAP_ROWSPEC,
+        FormFactory.MIN_ROWSPEC,
+        FormFactory.LINE_GAP_ROWSPEC,
+        FormFactory.MIN_ROWSPEC,
+        FormFactory.MIN_ROWSPEC,
+        FormFactory.MIN_ROWSPEC,
+        FormFactory.LINE_GAP_ROWSPEC,
+        FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.LINE_GAP_ROWSPEC,}));
+    
+    JLabel lblTitleChars = new JLabel(langApp.get("title"));
+    lblTitleChars.setFont(new Font("Tahoma", Font.PLAIN, 16));
+    pnlChars.add(lblTitleChars, "2, 2, 5, 1");
+    
+    list = new JList();
+    pnlChars.add(list, "4, 4, fill, fill");
+    
+    pnlLogin = new JPanel();
+    frame.getContentPane().add(pnlLogin, BorderLayout.CENTER);
+    pnlLogin.setLayout(new FormLayout(new ColumnSpec[] {
         FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
         FormFactory.MIN_COLSPEC,
         FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
@@ -83,28 +114,28 @@ public class DungeonSync {
     
     JLabel lblTitle = new JLabel(langApp.get("title"));
     lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 16));
-    panel.add(lblTitle, "2, 2, 5, 1");
+    pnlLogin.add(lblTitle, "2, 2, 5, 1");
     
     JLabel lblEmail = new JLabel(langApp.get("email") + ":");
-    panel.add(lblEmail, "2, 4, left, top");
+    pnlLogin.add(lblEmail, "2, 4, left, top");
     
     txtEmail = new JTextField();
-    panel.add(txtEmail, "4, 4, 3, 1, fill, top");
+    pnlLogin.add(txtEmail, "4, 4, 3, 1, fill, top");
     txtEmail.setColumns(10);
     
     JLabel lblPassword = new JLabel(langApp.get("password") + ":");
-    panel.add(lblPassword, "2, 5, left, top");
+    pnlLogin.add(lblPassword, "2, 5, left, top");
     
     txtPassword = new JPasswordField();
-    panel.add(txtPassword, "4, 5, 3, 1, fill, fill");
+    pnlLogin.add(txtPassword, "4, 5, 3, 1, fill, fill");
     
     final JLabel lblConfirm = new JLabel(langApp.get("password_confirmation") + ":");
     lblConfirm.setVisible(false);
-    panel.add(lblConfirm, "2, 6, left, top");
+    pnlLogin.add(lblConfirm, "2, 6, left, top");
     
     txtConfirm = new JPasswordField();
     txtConfirm.setVisible(false);
-    panel.add(txtConfirm, "4, 6, 3, 1, fill, fill");
+    pnlLogin.add(txtConfirm, "4, 6, 3, 1, fill, fill");
     
     chkNewAccount = new JCheckBox(langApp.get("newaccount"));
     chkNewAccount.addChangeListener(new ChangeListener() {
@@ -114,7 +145,7 @@ public class DungeonSync {
       }
     });
     
-    panel.add(chkNewAccount, "5, 8");
+    pnlLogin.add(chkNewAccount, "5, 8");
     
     btnLogIn = new JButton(langApp.get("login"));
     btnLogIn.addMouseListener(new MouseListener() {
@@ -133,7 +164,7 @@ public class DungeonSync {
       }
     });
     
-    panel.add(btnLogIn, "6, 8");
+    pnlLogin.add(btnLogIn, "6, 8");
   }
   
   @SuppressWarnings("deprecation")
@@ -149,7 +180,10 @@ public class DungeonSync {
     setEnabled(false);
     
     // See register()
-    API.login(txtEmail.getText(), txtPassword.getText());
+    API.Response response = API.login(txtEmail.getText(), txtPassword.getText());
+    if(response.success()) {
+      
+    }
   }
   
   private void setEnabled(boolean enabled) {
