@@ -132,5 +132,15 @@ public class API {
     private JSONObject _json;
     public HttpURLConnection con() { return _con; }
     public JSONObject json() { return _json; }
+    
+    public boolean success() {
+      try {
+        return _con.getResponseCode() >= 200 && _con.getResponseCode() < 300;
+      } catch(IOException e) {
+        e.printStackTrace();
+      }
+      
+      return false;
+    }
   }
 }
