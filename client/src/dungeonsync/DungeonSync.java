@@ -35,6 +35,7 @@ import java.util.Vector;
 import javax.swing.JList;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class DungeonSync {
   private API api = API.instance();
@@ -52,6 +53,8 @@ public class DungeonSync {
   private JList<String> lstChars;
   private Vector<Character> _char = new Vector<>();
   private Vector<String> _charName = new Vector<>();
+  private JLabel lblErrors;
+  private JLabel lblError;
   
   public DungeonSync() {
     EventQueue.invokeLater(new Runnable() {
@@ -75,7 +78,7 @@ public class DungeonSync {
     langApp = api.lang("app");
     
     frame = new JFrame();
-    frame.setBounds(100, 100, 427, 232);
+    frame.setBounds(100, 100, 427, 356); // 232
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.getContentPane().setLayout(new BorderLayout(0, 0));
     
@@ -127,6 +130,8 @@ public class DungeonSync {
         FormFactory.MIN_ROWSPEC,
         FormFactory.LINE_GAP_ROWSPEC,
         FormFactory.DEFAULT_ROWSPEC,
+        FormFactory.LINE_GAP_ROWSPEC,
+        FormFactory.MIN_ROWSPEC,
         FormFactory.LINE_GAP_ROWSPEC,}));
     
     JLabel lblTitle = new JLabel(langApp.get("title"));
@@ -134,21 +139,21 @@ public class DungeonSync {
     pnlLogin.add(lblTitle, "2, 2, 5, 1");
     
     JLabel lblEmail = new JLabel(langApp.get("email") + ":");
-    pnlLogin.add(lblEmail, "2, 4, left, top");
+    pnlLogin.add(lblEmail, "2, 4");
     
     txtEmail = new JTextField();
     pnlLogin.add(txtEmail, "4, 4, 3, 1, fill, top");
     txtEmail.setColumns(10);
     
     JLabel lblPassword = new JLabel(langApp.get("password") + ":");
-    pnlLogin.add(lblPassword, "2, 5, left, top");
+    pnlLogin.add(lblPassword, "2, 5");
     
     txtPassword = new JPasswordField();
     pnlLogin.add(txtPassword, "4, 5, 3, 1, fill, fill");
     
     final JLabel lblConfirm = new JLabel(langApp.get("password_confirmation") + ":");
     lblConfirm.setVisible(false);
-    pnlLogin.add(lblConfirm, "2, 6, left, top");
+    pnlLogin.add(lblConfirm, "2, 6");
     
     txtConfirm = new JPasswordField();
     txtConfirm.setVisible(false);
@@ -162,6 +167,8 @@ public class DungeonSync {
       }
     });
     
+    lblErrors = new JLabel("Errors:");
+    pnlLogin.add(lblErrors, "2, 8");
     pnlLogin.add(chkNewAccount, "5, 8");
     
     btnLogIn = new JButton(langApp.get("login"));
@@ -188,6 +195,24 @@ public class DungeonSync {
               
               pnlLogin.setVisible(false);
               pnlChars.setVisible(true);
+            } else {
+              JSONObject errors = resp.parseObject();
+              StringBuilder s = new StringBuilder("<html>");
+              for(Object k : errors.keySet()) {
+                String key = (String)k;
+                s.append(key);
+                s.append(":<br>");
+                
+                JSONArray error = errors.getJSONArray(key);
+                for(int i = 0; i < error.length(); i++) {
+                  s.append(error.getString(i));
+                  s.append("<br>");
+                }
+                
+                s.append("<br>");
+              }
+              
+              lblError.setText(s.toString());
             }
           } catch(IOException e) {
             e.printStackTrace();
@@ -197,6 +222,9 @@ public class DungeonSync {
     });
     
     pnlLogin.add(btnLogIn, "6, 8");
+    
+    lblError = new JLabel("");
+    pnlLogin.add(lblError, "2, 10, 5, 1");
   }
   
   private void chars() throws IOException {
