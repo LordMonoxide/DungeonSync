@@ -8,14 +8,12 @@ import java.io.OutputStream;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 
-import org.json.JSONException;
+import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 public class API {
   private static API _instance = new API();
@@ -27,8 +25,8 @@ public class API {
     CookieHandler.setDefault(new CookieManager());
   }
   
-  public HashMap<String, String> lang(String type) {
-    JSONObject json = request("lang/" + type)._json;
+  public HashMap<String, String> lang(String type) throws IOException {
+    JSONObject json = request("lang/" + type).parseObject();
     HashMap<String, String> lang = new HashMap<>();
     
     for(Object k : json.keySet()) {
@@ -39,97 +37,55 @@ public class API {
     return lang;
   }
   
-  public Response register(String email, String password, String confirmation) {
+  public Response register(String email, String password, String confirmation) throws IOException {
     return request("auth/register", "PUT", param("email", email), param("password", password), param("password_confirmation", confirmation));
   }
   
-  public Response login(String email, String password) {
+  public Response login(String email, String password) throws IOException {
     return request("auth/login", "PUT", param("email", email), param("password", password));
   }
   
-  public Response chars() {
+  public Response chars() throws IOException {
     return request("characters");
   }
   
-  public Response request(String url, Parameter... param) {
+  public Response request(String url, Parameter... param) throws IOException {
     return request(url, "GET", param);
   }
   
-  public Response request(String url, String method, Parameter... param) {
+  public Response request(String url, String method, Parameter... param) throws IOException {
     return request(url, method, "UTF-8", param);
   }
   
-  public Response request(String url, String method, String encoding, Parameter... param) {
-    Response con = new Response();
+  public Response request(String url, String method, String encoding, Parameter... param) throws IOException {
+    HttpURLConnection con;
     
-    try {
-      con._con = (HttpURLConnection)new URL(baseURL + url).openConnection();
-      con._con.setRequestMethod(method);
-      con._con.setRequestProperty("Accept-Charset", encoding);
-      con._con.setUseCaches(false);
+    con = (HttpURLConnection)new URL(baseURL + url).openConnection();
+    con.setRequestMethod(method);
+    con.setRequestProperty("Accept-Charset", encoding);
+    con.setUseCaches(false);
+    
+    if(!"GET".equalsIgnoreCase(method)) {
+      con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + encoding);
+      con.setDoInput(true);
+      con.setDoOutput(true);
       
-      if(!"GET".equalsIgnoreCase(method)) {
-        con._con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + encoding);
-        con._con.setDoInput(true);
-        con._con.setDoOutput(true);
-        
-        String params = "";
-        for(Parameter p : param) {
-          if(params.length() != 0) { params += "&"; }
-          params += p.key + "=" + URLEncoder.encode(p.val, encoding);
-        }
-        
-        OutputStream out = con._con.getOutputStream();
-        out.write(params.getBytes("UTF-8"));
-        out.close();
+      String params = "";
+      for(Parameter p : param) {
+        if(params.length() != 0) { params += "&"; }
+        params += p.key + "=" + URLEncoder.encode(p.val, encoding);
       }
       
-      con._json = JSONFromInputStream(con._con.getInputStream());
-      return con;
-    } catch(MalformedURLException e) {
-      e.printStackTrace();
-    } catch(IOException e) {
-      e.printStackTrace();
-      
-      if(con != null) {
-        con._json = JSONFromInputStream(con._con.getErrorStream());
-        return con;
-      }
+      OutputStream out = con.getOutputStream();
+      out.write(params.getBytes("UTF-8"));
+      out.close();
     }
     
-    return null;
+    return new Response(con);
   }
   
   public Parameter param(String key, String val) {
     return new Parameter(key, val);
-  }
-  
-  private JSONObject JSONFromInputStream(InputStream is) {
-    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-    String line;
-    StringBuffer resp = new StringBuffer();
-    
-    try {
-      while((line = rd.readLine()) != null) {
-        resp.append(line);
-        resp.append('\r');
-      }
-    } catch(IOException e) {
-      e.printStackTrace();
-    }
-    
-    try {
-      rd.close();
-    } catch(IOException e) { }
-    
-    System.out.println(resp.toString());
-    
-    try {
-      return new JSONObject(new JSONTokener(resp.toString()));
-    } catch(JSONException e) {
-      e.printStackTrace();
-      return null;
-    }
   }
   
   public static class Parameter {
@@ -142,18 +98,40 @@ public class API {
   
   public static class Response {
     private HttpURLConnection _con;
-    private JSONObject _json;
-    public HttpURLConnection con() { return _con; }
-    public JSONObject json() { return _json; }
+    private String _resp;
     
-    public boolean success() {
+    private Response(HttpURLConnection con) throws IOException {
+      _con = con;
+      
       try {
-        return _con.getResponseCode() >= 200 && _con.getResponseCode() < 300;
+        _resp = read(_con.getInputStream());
       } catch(IOException e) {
         e.printStackTrace();
+        _resp = read(_con.getErrorStream());
+      }
+    }
+    
+    public int     status () throws IOException { return _con.getResponseCode(); }
+    public boolean success() throws IOException { return status() >= 200 && status() < 300; }
+    public JSONObject parseObject() { return new JSONObject(_resp); }
+    public JSONArray  parseArray () { return new JSONArray (_resp); }
+    
+    
+    private String read(InputStream is) throws IOException {
+      BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+      StringBuffer resp = new StringBuffer();
+      String line;
+      
+      while((line = rd.readLine()) != null) {
+        resp.append(line);
+        resp.append('\r');
       }
       
-      return false;
+      rd.close();
+      
+      System.out.println(resp.toString());
+      
+      return resp.toString();
     }
   }
 }

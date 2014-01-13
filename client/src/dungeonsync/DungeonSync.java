@@ -16,6 +16,7 @@ import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.factories.FormFactory;
 
 import dungeonsync.api.API;
+import dungeonsync.api.Character;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -27,8 +28,13 @@ import javax.swing.event.ChangeListener;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Vector;
+
 import javax.swing.JList;
+
+import org.json.JSONArray;
 
 public class DungeonSync {
   private API api = API.instance();
@@ -43,21 +49,29 @@ public class DungeonSync {
   
   private HashMap<String, String> langApp;
   private JPanel pnlChars;
-  private JList list;
+  private JList<String> lstChars;
+  private Vector<Character> _char = new Vector<>();
+  private Vector<String> _charName = new Vector<>();
   
   public DungeonSync() {
     EventQueue.invokeLater(new Runnable() {
       @Override public void run() {
-        initialize();
+        try {
+          initialize();
+        } catch(IOException e) {
+          e.printStackTrace();
+        }
+        
         frame.setVisible(true);
       }
     });
   }
   
   /**
+   * @throws IOException 
    * @wbp.parser.entryPoint
    */
-  private void initialize() {
+  private void initialize() throws IOException {
     langApp = api.lang("app");
     
     frame = new JFrame();
@@ -90,8 +104,9 @@ public class DungeonSync {
     lblTitleChars.setFont(new Font("Tahoma", Font.PLAIN, 16));
     pnlChars.add(lblTitleChars, "2, 2, 5, 1");
     
-    list = new JList();
-    pnlChars.add(list, "4, 4, fill, fill");
+    lstChars = new JList<>();
+    pnlChars.add(lstChars, "4, 4, fill, fill");
+    pnlChars.setVisible(false);
     
     pnlLogin = new JPanel();
     frame.getContentPane().add(pnlLogin, BorderLayout.CENTER);
@@ -157,10 +172,25 @@ public class DungeonSync {
       @Override public void mouseEntered(MouseEvent ev) { }
       @Override public void mouseClicked(MouseEvent ev) {
         if(ev.getButton() == MouseEvent.BUTTON1) {
-          if(chkNewAccount.isSelected()) {
-            register();
-          } else {
-            login();
+          setEnabled(false);
+          
+          try {
+            API.Response resp;
+            
+            if(chkNewAccount.isSelected()) {
+              resp = api.register(txtEmail.getText(), txtPassword.getText(), txtConfirm.getText());
+            } else {
+              resp = api.login(txtEmail.getText(), txtPassword.getText());
+            }
+            
+            if(resp.success()) {
+              chars();
+              
+              pnlLogin.setVisible(false);
+              pnlChars.setVisible(true);
+            }
+          } catch(IOException e) {
+            e.printStackTrace();
           }
         }
       }
@@ -169,23 +199,20 @@ public class DungeonSync {
     pnlLogin.add(btnLogIn, "6, 8");
   }
   
-  @SuppressWarnings("deprecation")
-  private void register() {
-    setEnabled(false);
+  private void chars() throws IOException {
+    API.Response response = api.chars();
     
-    // We have no choice but to use getText() because URLEncoder sucks
-    api.register(txtEmail.getText(), txtPassword.getText(), txtConfirm.getText());
-  }
-  
-  @SuppressWarnings("deprecation")
-  private void login() {
-    setEnabled(false);
-    
-    // See register()
-    API.Response response = api.login(txtEmail.getText(), txtPassword.getText());
     if(response.success()) {
-      response = api.chars();
-      System.out.println(response.json());
+      _char.clear();
+      _charName.clear();
+      
+      JSONArray chars = response.parseArray();
+      for(int i = 0; i < chars.length(); i++) {
+        _char.addElement(new Character(chars.getJSONObject(i)));
+        _charName.add(_char.get(i).original);
+      }
+      
+      lstChars.setListData(_charName);
     }
   }
   
